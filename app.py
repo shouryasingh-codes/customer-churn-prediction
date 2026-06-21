@@ -103,50 +103,186 @@ def predict(customer: Customer):
 # --------------------------------------------------
 # SIMPLE UI ENDPOINT
 # --------------------------------------------------
+# --------------------------------------------------
+# UI ENDPOINT (WITH PREMIUM MODERN DESIGN & EXPLICIT LABELS)
+# FIXED: Pehle inputs ke upar unka naam (labels) nahi tha, sirf placeholders the.
+# GALAT: Value type karne ke baad placeholder gayab ho jata tha aur pata nahi chalta tha kis box mein kya daala hai.
+# SAHI: Ab har box ke upar clear labels laga diye hain aur design ko modern dark-themed 2-column grid bana diya hai.
+# --------------------------------------------------
 @app.get("/ui", response_class=HTMLResponse)
 def ui():
     return """
     <html>
     <head>
         <title>Customer Churn Predictor</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
-            body { font-family: Arial; min-height: 100vh; background: linear-gradient(135deg, #1f2933, #111827); display: flex; justify-content: center; align-items: flex-start;padding-top: 40px;}
-           .box { background: white; padding: 20px; border-radius: 10px; max-width: 600px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);}
-           input, select { width: 100%; padding: 6px; margin: 5px 0; }
-            button { padding: 10px; width: 100%; background: black; color: white; }
-            pre { background: #eee; padding: 10px; }
+            body { 
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                min-height: 100vh; 
+                background: linear-gradient(135deg, #0f172a, #1e293b); 
+                color: #f8fafc;
+                display: flex; 
+                justify-content: center; 
+                align-items: flex-start;
+                padding: 40px 20px;
+                margin: 0;
+            }
+            .box { 
+                background: rgba(30, 41, 59, 0.7); 
+                backdrop-filter: blur(10px);
+                padding: 30px; 
+                border-radius: 16px; 
+                width: 100%;
+                max-width: 750px; 
+                box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            h1 {
+                text-align: center;
+                font-size: 28px;
+                font-weight: 700;
+                margin-top: 0;
+                margin-bottom: 8px;
+                background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+            .subtitle {
+                text-align: center;
+                color: #94a3b8;
+                margin-bottom: 25px;
+                font-size: 14px;
+            }
+            h2 {
+                font-size: 18px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                padding-bottom: 8px;
+                margin-bottom: 20px;
+                color: #3b82f6;
+            }
+            .grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 16px;
+                margin-bottom: 25px;
+            }
+            .input-group {
+                display: flex;
+                flex-direction: column;
+            }
+            label {
+                font-size: 13px;
+                font-weight: 600;
+                color: #94a3b8;
+                margin-bottom: 6px;
+            }
+            input, select { 
+                padding: 10px 12px; 
+                border-radius: 8px;
+                background: rgba(15, 23, 42, 0.6);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                color: #f8fafc;
+                font-size: 14px;
+                transition: all 0.3s ease;
+                outline: none;
+            }
+            input:focus, select:focus {
+                border-color: #3b82f6;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+                background: rgba(15, 23, 42, 0.8);
+            }
+            button { 
+                padding: 12px; 
+                width: 100%; 
+                background: linear-gradient(135deg, #3b82f6, #8b5cf6); 
+                color: white; 
+                border: none;
+                border-radius: 8px;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: transform 0.2s ease, opacity 0.2s ease;
+            }
+            button:hover {
+                opacity: 0.95;
+            }
+            button:active {
+                transform: scale(0.98);
+            }
+            h3 {
+                font-size: 18px;
+                margin-top: 25px;
+                margin-bottom: 10px;
+                color: #10b981;
+            }
+            pre { 
+                background: rgba(15, 23, 42, 0.8); 
+                border: 1px solid rgba(16, 185, 129, 0.3);
+                border-radius: 8px;
+                padding: 15px; 
+                color: #34d399;
+                font-family: 'Courier New', Courier, monospace;
+                font-size: 14px;
+                line-height: 1.5;
+                white-space: pre-wrap;
+                margin: 0;
+            }
         </style>
     </head>
     <body>
         <div class="box">
-         <h1 style="
-            text-align: center;
-            font-size: 26px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        ">
-            Customer Churn Prediction System
-        </h1>
+            <h1>Customer Churn Prediction System</h1>
+            <div class="subtitle">Enter customer behavior details to analyze churn risk</div>
+            
             <h2>Customer Details</h2>
-            <input id="tenure" placeholder="Tenure (months)">
-            <input id="last_active_days" placeholder="Last Active Days">
-            <input id="usage_frequency" placeholder="Usage Frequency / week">
-            <input id="session_duration" placeholder="Session Duration (mins)">
-            <input id="complaints" placeholder="Complaints">
-            <input id="monthly_charges" placeholder="Monthly Charges">
-            <input id="payment_missed" placeholder="Payment Missed (0 or 1)">
-            <input id="products_used" placeholder="Products Used">
+            <div class="grid">
+                <div class="input-group">
+                    <label for="tenure">Tenure (months)</label>
+                    <input id="tenure" type="number" placeholder="e.g. 12">
+                </div>
+                <div class="input-group">
+                    <label for="last_active_days">Last Active Days</label>
+                    <input id="last_active_days" type="number" placeholder="e.g. 5">
+                </div>
+                <div class="input-group">
+                    <label for="usage_frequency">Usage Frequency (per week)</label>
+                    <input id="usage_frequency" type="number" placeholder="e.g. 3">
+                </div>
+                <div class="input-group">
+                    <label for="session_duration">Session Duration (minutes)</label>
+                    <input id="session_duration" type="number" placeholder="e.g. 45">
+                </div>
+                <div class="input-group">
+                    <label for="complaints">Complaints Count</label>
+                    <input id="complaints" type="number" placeholder="e.g. 0">
+                </div>
+                <div class="input-group">
+                    <label for="monthly_charges">Monthly Charges (₹)</label>
+                    <input id="monthly_charges" type="number" placeholder="e.g. 600">
+                </div>
+                <div class="input-group">
+                    <label for="payment_missed">Payment Missed (1 = Yes, 0 = No)</label>
+                    <input id="payment_missed" type="number" placeholder="e.g. 0">
+                </div>
+                <div class="input-group">
+                    <label for="products_used">Products Used Count</label>
+                    <input id="products_used" type="number" placeholder="e.g. 2">
+                </div>
+                <div class="input-group" style="grid-column: 1 / -1;">
+                    <label for="plan_type">Plan Type</label>
+                    <select id="plan_type">
+                        <option value="basic">Basic</option>
+                        <option value="standard">Standard</option>
+                        <option value="premium">Premium</option>
+                    </select>
+                </div>
+            </div>
 
-            <select id="plan_type">
-                <option value="basic">Basic</option>
-                <option value="standard">Standard</option>
-                <option value="premium">Premium</option>
-            </select>
+            <button onclick="predict()">Analyze Churn Risk</button>
 
-            <button onclick="predict()">Predict</button>
-
-            <h3>Result</h3>
-            <pre id="result"></pre>
+            <h3>Result Analysis</h3>
+            <pre id="result">Click button to generate prediction...</pre>
         </div>
 
         <script>
@@ -193,11 +329,12 @@ Plan Type        : ${plan_type.value}
 Prediction
 -----------
 Churn Probability : ${data.churn_probability}
-Risk Level        : ${data.risk}
-Recommended Action: ${data.recommended_action}`;
+Risk Level        : ${data.risk.toUpperCase()}
+Recommended Action: ${data.recommended_action.toUpperCase()}`;
                 });
             }
         </script>
     </body>
     </html>
     """
+
