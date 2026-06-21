@@ -1,3 +1,13 @@
+---
+title: Customer Churn Prediction
+emoji: 📉
+colorFrom: red
+colorTo: blue
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # Customer Retention AI System
 
 An end-to-end machine learning system that predicts customer churn and recommends retention actions.
