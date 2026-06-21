@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from typing import Literal
 import pandas as pd
 import joblib
 
@@ -16,25 +17,32 @@ app = FastAPI()
 
 # --------------------------------------------------
 # Input schema
+# FIXED: Pehle koi validation nahi tha — koi bhi negative ya galat value accept ho jaati thi
+# GALAT: tenure: -50, complaints: -100, payment_missed: 5, plan_type: "xyz" sab chalti thi
+# SAHI: Ab Field() se range check lagaya hai — galat input pe clear error milega, garbage prediction nahi
 # --------------------------------------------------
 class Customer(BaseModel):
-    tenure: int
-    last_active_days: int
-    usage_frequency: int
-    session_duration: int
-    complaints: int
-    monthly_charges: float
-    payment_missed: int
-    products_used: int
-    plan_type: str
+    tenure: int = Field(ge=0, description="Months customer has been active")
+    last_active_days: int = Field(ge=0, description="Days since last activity")
+    usage_frequency: int = Field(ge=0, description="Usage per week")
+    session_duration: int = Field(ge=0, description="Session duration in minutes")
+    complaints: int = Field(ge=0, description="Number of complaints")
+    monthly_charges: float = Field(gt=0, description="Monthly charges in rupees")
+    payment_missed: int = Field(ge=0, le=1, description="0 or 1 only")
+    products_used: int = Field(ge=1, description="At least 1 product")
+    plan_type: Literal["basic", "standard", "premium"]  # FIXED: pehle str tha — koi bhi value chalti thi, ab sirf ye 3 chalegi
 
 # --------------------------------------------------
 # Business logic helpers
 # --------------------------------------------------
+# FIXED: Pehle thresholds 0.2 / 0.6 the jo GALAT the
+# Kyunki tr.py (training) mein 0.3 / 0.7 use kiya tha
+# Isse production mein alag results aa rahe the vs training evaluation
+# Ab SAHI hai: 0.3 / 0.7 — tr.py ke saath match karta hai
 def segment(prob):
-    if prob < 0.2:
+    if prob < 0.3:
         return "low risk"
-    elif prob < 0.6:
+    elif prob < 0.7:
         return "medium risk"
     else:
         return "high risk"
@@ -142,6 +150,9 @@ def ui():
         </div>
 
         <script>
+            // FIXED: Pehle koi error handling nahi tha
+            // GALAT: Agar API validation error deta tha (jaise payment_missed=3) toh "undefined" dikhta tha
+            // SAHI: Ab error hone pe clear message dikhega ki kya galat hai
             function predict() {
                 fetch("/predict", {
                     method: "POST",
@@ -158,8 +169,14 @@ def ui():
                         plan_type: plan_type.value
                     })
                 })
-                .then(res => res.json())
-                .then(data => {
+                .then(res => res.json().then(data => ({status: res.status, data: data})))
+                .then(({status, data}) => {
+                    if (status !== 200) {
+                        // Validation error aaya — user ko clear message dikhao
+                        let errors = data.detail.map(e => e.loc[1] + ": " + e.msg).join("\\n");
+                        document.getElementById("result").innerText = "❌ Input Error:\\n" + errors;
+                        return;
+                    }
                     document.getElementById("result").innerText =
 `Customer Summary
 ----------------
